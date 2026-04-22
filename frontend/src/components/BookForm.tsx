@@ -32,7 +32,7 @@ const BookForm: React.FC<BookFormProps> = ({
     description?: string;
   }>({});
 
-  // FIX: защита от бесконечного ререндера
+
   useEffect(() => {
     if (!initialData) return;
 

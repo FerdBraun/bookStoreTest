@@ -37,7 +37,6 @@ export const updateBook = async (
   return data;
 };
 
-// ⚠️ только если реально есть endpoint на бэке
 export const deleteBook = async (id: string): Promise<void> => {
   await apiClient.delete(`/books/${id}`);
 };
