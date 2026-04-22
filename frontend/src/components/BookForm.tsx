@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { CreateBookDTO } from '../types/book';
 import { validateBookField } from '../utils/validation';
@@ -10,24 +11,39 @@ interface BookFormProps {
   submitLabel: string;
 }
 
+const EMPTY: CreateBookDTO = {
+  name: '',
+  description: '',
+};
+
 const BookForm: React.FC<BookFormProps> = ({
-  initialData = { name: '', description: '' },
+  initialData,
   onSubmit,
   onCancel,
   isLoading = false,
   submitLabel,
 }) => {
-  const [formData, setFormData] =
-    useState<CreateBookDTO>(initialData);
+  const [formData, setFormData] = useState<CreateBookDTO>(
+    initialData ?? EMPTY
+  );
 
   const [errors, setErrors] = useState<{
     name?: string;
     description?: string;
   }>({});
 
+  // FIX: защита от бесконечного ререндера
   useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]);
+    if (!initialData) return;
+
+    setFormData((prev) => {
+      const same =
+        prev.name === initialData.name &&
+        prev.description === initialData.description;
+
+      return same ? prev : initialData;
+    });
+  }, [initialData?.name, initialData?.description]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,8 +64,6 @@ const BookForm: React.FC<BookFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    setErrors({});
 
     const nameError = validateBookField(formData.name, 'name');
     const descriptionError = validateBookField(
@@ -72,77 +86,57 @@ const BookForm: React.FC<BookFormProps> = ({
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* NAME */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Book Name <span className="text-red-500">*</span>
         </label>
 
         <input
-          type="text"
-          id="name"
           name="name"
           value={formData.name}
           onChange={handleChange}
           disabled={isLoading}
-          placeholder="Enter book name"
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition ${
+          className={`w-full px-4 py-2 border rounded-lg ${
             errors.name ? 'border-red-500' : 'border-gray-300'
           }`}
         />
 
         {errors.name && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.name}
-          </p>
+          <p className="text-sm text-red-600">{errors.name}</p>
         )}
       </div>
 
       {/* DESCRIPTION */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Description <span className="text-red-500">*</span>
         </label>
 
         <textarea
-          id="description"
           name="description"
           value={formData.description}
           onChange={handleChange}
           rows={6}
           disabled={isLoading}
-          placeholder="Enter book description"
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition resize-none ${
+          className={`w-full px-4 py-2 border rounded-lg ${
             errors.description ? 'border-red-500' : 'border-gray-300'
           }`}
         />
 
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="text-sm text-red-600">
             {errors.description}
           </p>
         )}
       </div>
 
       {/* ACTIONS */}
-      <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isLoading}
-          className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
-        >
+      <div className="flex justify-end space-x-4">
+        <button type="button" onClick={onCancel}>
           Cancel
         </button>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-blue-700 transition flex items-center justify-center min-w-[120px]"
-        >
-          {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            submitLabel
-          )}
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Loading...' : submitLabel}
         </button>
       </div>
     </form>

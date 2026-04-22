@@ -1,5 +1,5 @@
 // @ts-ignore
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBook } from '../api/books';
@@ -15,9 +15,11 @@ const AdminCreateBookPage = () => {
 
   const user = useAuthStore((s) => s.user);
 
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
 
   const mutation = useMutation({
     mutationFn: (newBook: CreateBookDTO) => createBook(newBook),
@@ -35,6 +37,14 @@ const AdminCreateBookPage = () => {
   const handleSubmit = (data: CreateBookDTO) => {
     mutation.mutate(data);
   };
+
+
+  if (!ready) return null;
+
+
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
