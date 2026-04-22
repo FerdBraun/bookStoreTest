@@ -1,0 +1,16 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom theme overrides */
+:root {
+  --color-primary: #2563eb; /* Indigo 600 */
+  --color-secondary: #4b5563; /* Gray 700 */
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f9fafb; /* Light gray */
+  color: #111827; /* Gray 900 */
+}
