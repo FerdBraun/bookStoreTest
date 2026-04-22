@@ -152,7 +152,7 @@ app.post<{ Body: PostAuthUserBody }>("/api/auth/user", {
   }
 }, (req, reply) => {
   if (req.session.isAuthenticated) {
-    throw new UnauthorizedError();
+  req.session.destroy(() => {});
   }
 
   const { login, password } = req.body;
@@ -173,7 +173,10 @@ app.post<{ Body: PostAuthUserBody }>("/api/auth/user", {
     created_at: user.createdAt.toISOString()
   });
 });
-
+app.post("/api/auth/logout", (req, reply) => {
+  req.session.destroy(() => {});
+  reply.send();
+});
 app.get("/api/me", (req, reply) => {
   if (!req.session.isAuthenticated) {
     throw new UnauthenticatedError();

@@ -1,177 +1,65 @@
 // @ts-ignore
-import React, { useEffect, useState } from 'react';
-import { CreateBookDTO } from '../types/book';
-import { validateBookField } from '../utils/validation';
+import React from 'react';
+import { Book } from '../types/book';
+import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import { Edit, Trash2 } from 'lucide-react';
 
-interface BookFormProps {
-  initialData?: CreateBookDTO;
-  onSubmit: (data: CreateBookDTO) => void;
-  onCancel: () => void;
-  isLoading?: boolean;
-  submitLabel: string;
+interface BookCardProps {
+  book: Book;
+  onDelete?: (id: string) => void;
 }
 
-const BookForm: React.FC<BookFormProps> = ({
-  initialData = { name: '', description: '' },
-  onSubmit,
-  onCancel,
-  isLoading = false,
-  submitLabel,
-}) => {
-  const [formData, setFormData] =
-    useState<CreateBookDTO>(initialData);
-
-  const [errors, setErrors] = useState<{
-    name?: string;
-    description?: string;
-  }>({});
-
-  // sync only when initialData changes (edit mode safe)
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
-  ) => {
-    const field = e.target.name as keyof CreateBookDTO;
-    const value = e.target.value;
-
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [field]: undefined,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setErrors({});
-
-    const nameError = validateBookField(
-      formData.name,
-      'name'
-    );
-    const descriptionError = validateBookField(
-      formData.description,
-      'description'
-    );
-
-    if (nameError || descriptionError) {
-      setErrors({
-        name: nameError || undefined,
-        description: descriptionError || undefined,
-      });
-      return;
-    }
-
-    onSubmit(formData);
-  };
+const BookCard: React.FC<BookCardProps> = ({ book, onDelete }) => {
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === 'admin';
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-      aria-busy={isLoading}
-    >
-      {/* NAME */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 flex flex-col h-full">
+      <div className="p-6 flex-grow">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2" title={book.name}>
+          {book.name}
+        </h3>
+
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+          {book.description}
+        </p>
+
+        <div className="text-xs text-gray-400">
+          Published: {new Date(book.created_at).toLocaleDateString()}
+        </div>
+      </div>
+
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center mt-auto">
+        <Link
+          to={`/book/${book.id}`}
+          className="text-primary hover:text-blue-800 font-medium text-sm transition-colors"
         >
-          Book Name{' '}
-          <span className="text-red-500">*</span>
-        </label>
+          View Details
+        </Link>
 
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          disabled={isLoading}
-          placeholder="Enter book name"
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition ${
-            errors.name
-              ? 'border-red-500'
-              : 'border-gray-300'
-          }`}
-        />
+        {isAdmin && onDelete && (
+          <div className="flex space-x-3 text-gray-400">
+            <Link
+              to={`/admin/edit/${book.id}`}
+              className="hover:text-primary transition-colors"
+              aria-label="Edit book"
+            >
+              <Edit size={18} />
+            </Link>
 
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.name}
-          </p>
+            <button
+              onClick={() => onDelete(book.id)}
+              className="hover:text-red-500 transition-colors"
+              aria-label="Delete book"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
         )}
       </div>
-
-      {/* DESCRIPTION */}
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Description{' '}
-          <span className="text-red-500">*</span>
-        </label>
-
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows={6}
-          disabled={isLoading}
-          placeholder="Enter book description"
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition resize-none ${
-            errors.description
-              ? 'border-red-500'
-              : 'border-gray-300'
-          }`}
-        />
-
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.description}
-          </p>
-        )}
-      </div>
-
-      {/* ACTIONS */}
-      <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isLoading}
-          className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
-        >
-          Cancel
-        </button>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-blue-700 transition flex items-center justify-center min-w-[120px]"
-        >
-          {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            submitLabel
-          )}
-        </button>
-      </div>
-    </form>
+    </div>
   );
 };
 
-export default BookForm;
+export default BookCard;

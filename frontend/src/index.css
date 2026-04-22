@@ -1,8 +1,7 @@
 /* src/index.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@config "../tailwind.config.js";
 /* Custom theme overrides */
 :root {
   --color-primary: #2563eb; /* Indigo 600 */

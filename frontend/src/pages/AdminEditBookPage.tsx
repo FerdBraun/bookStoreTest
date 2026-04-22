@@ -1,17 +1,24 @@
 // @ts-ignore
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBookById, updateBook } from '../api/books';
 import { UpdateBookDTO, Book } from '../types/book';
 import Header from '../components/Header';
 import BookForm from '../components/BookForm';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 const AdminEditBookPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const user = useAuthStore((s) => s.user);
+
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   const {
     data: book,
@@ -35,7 +42,7 @@ const AdminEditBookPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
       queryClient.invalidateQueries({ queryKey: ['book', id] });
-      navigate('/');
+      navigate(`/book/${id}`);
     },
 
     onError: (error) => {

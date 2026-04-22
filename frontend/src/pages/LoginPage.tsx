@@ -16,37 +16,31 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    setError('');
-    setIsLoading(true);
+  setError('');
+  setIsLoading(true);
 
-    try {
-      const response = await loginApi({
-        login,
-        password,
-      });
+  try {
+    const response = await loginApi({ login, password });
 
-      // cookie-based auth (server sets `us`)
-      setUser({
-        login: response.login,
-        role: response.role,
-      });
+    setUser({
+      login: response.login,
+      role: response.role,
+      created_at: response.created_at,
+    });
 
-      navigate('/');
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.message ||
-            'Invalid login or password'
-        );
-      } else {
-        setError('Unexpected error occurred');
-      }
-    } finally {
-      setIsLoading(false);
+    navigate('/');
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      setError(err.response?.data?.message || 'Invalid credentials');
+    } else {
+      setError('Unexpected error');
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
@@ -88,7 +82,7 @@ const LoginPage: React.FC = () => {
               value={login}
               onChange={(e) => {
                 setLogin(e.target.value);
-                setError('');
+                if (error) setError('');
               }}
               disabled={isLoading}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
@@ -111,7 +105,7 @@ const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
-                setError('');
+                if (error) setError('');
               }}
               disabled={isLoading}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"

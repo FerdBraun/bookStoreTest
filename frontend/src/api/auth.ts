@@ -11,14 +11,17 @@ export interface LoginResponse {
   created_at: string;
 }
 
-/**
- * Auth via cookie session (us)
- */
-export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
+export const login = async (
+  credentials: LoginRequest
+): Promise<LoginResponse> => {
   const { data } = await apiClient.post<LoginResponse>(
-    '/api/auth/user',
+    '/auth/user',
     credentials
   );
 
   return data;
+};
+
+export const logout = async (): Promise<void> => {
+  await apiClient.post('/auth/logout');
 };

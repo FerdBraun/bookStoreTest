@@ -1,4 +1,3 @@
-// @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { CreateBookDTO } from '../types/book';
 import { validateBookField } from '../utils/validation';
@@ -26,18 +25,14 @@ const BookForm: React.FC<BookFormProps> = ({
     description?: string;
   }>({});
 
-  // sync for edit mode
   useEffect(() => {
     setFormData(initialData);
   }, [initialData]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const field =
-      e.target.name as keyof CreateBookDTO;
+    const field = e.target.name as keyof CreateBookDTO;
     const value = e.target.value;
 
     setFormData((prev) => ({
@@ -56,11 +51,7 @@ const BookForm: React.FC<BookFormProps> = ({
 
     setErrors({});
 
-    const nameError = validateBookField(
-      formData.name,
-      'name'
-    );
-
+    const nameError = validateBookField(formData.name, 'name');
     const descriptionError = validateBookField(
       formData.description,
       'description'
@@ -81,12 +72,8 @@ const BookForm: React.FC<BookFormProps> = ({
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* NAME */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Book Name{' '}
-          <span className="text-red-500">*</span>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          Book Name <span className="text-red-500">*</span>
         </label>
 
         <input
@@ -98,9 +85,7 @@ const BookForm: React.FC<BookFormProps> = ({
           disabled={isLoading}
           placeholder="Enter book name"
           className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition ${
-            errors.name
-              ? 'border-red-500'
-              : 'border-gray-300'
+            errors.name ? 'border-red-500' : 'border-gray-300'
           }`}
         />
 
@@ -113,12 +98,8 @@ const BookForm: React.FC<BookFormProps> = ({
 
       {/* DESCRIPTION */}
       <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Description{' '}
-          <span className="text-red-500">*</span>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          Description <span className="text-red-500">*</span>
         </label>
 
         <textarea
@@ -130,9 +111,7 @@ const BookForm: React.FC<BookFormProps> = ({
           disabled={isLoading}
           placeholder="Enter book description"
           className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition resize-none ${
-            errors.description
-              ? 'border-red-500'
-              : 'border-gray-300'
+            errors.description ? 'border-red-500' : 'border-gray-300'
           }`}
         />
 

@@ -11,7 +11,9 @@ import { Book } from '../types/book';
 const BookDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useAuthStore((state) => state.isAdmin());
+
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === 'admin';
 
   const {
     data: book,
@@ -19,7 +21,10 @@ const BookDetailPage = () => {
     isError,
   } = useQuery<Book>({
     queryKey: ['book', id],
-    queryFn: () => getBookById(id as string),
+    queryFn: () => {
+      if (!id) throw new Error('No book id');
+      return getBookById(id);
+    },
     enabled: !!id,
   });
 
@@ -42,8 +47,12 @@ const BookDetailPage = () => {
           </div>
         ) : isError || !book ? (
           <div className="bg-red-50 text-red-600 p-8 rounded-xl text-center shadow-sm border border-red-100">
-            <h3 className="text-xl font-semibold mb-2">Book Not Found</h3>
-            <p>The book you are looking for does not exist or an error occurred.</p>
+            <h3 className="text-xl font-semibold mb-2">
+              Book Not Found
+            </h3>
+            <p>
+              The book you are looking for does not exist or an error occurred.
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
@@ -59,7 +68,9 @@ const BookDetailPage = () => {
                     className="flex-shrink-0 flex items-center space-x-1 px-4 py-2 bg-blue-50 text-primary rounded-lg hover:bg-blue-100 transition font-medium text-sm"
                   >
                     <Edit size={16} />
-                    <span className="hidden sm:inline">Edit Book</span>
+                    <span className="hidden sm:inline">
+                      Edit Book
+                    </span>
                   </Link>
                 )}
               </div>
@@ -68,11 +79,14 @@ const BookDetailPage = () => {
                 <Calendar size={18} className="mr-2" />
                 <span>
                   Published on{' '}
-                  {new Date(book.created_at).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {new Date(book.created_at).toLocaleDateString(
+                    undefined,
+                    {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    }
+                  )}
                 </span>
               </div>
 

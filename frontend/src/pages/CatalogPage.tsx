@@ -6,6 +6,7 @@ import { SortBy, SortOrder, Book } from '../types/book';
 import BookCard from '../components/BookCard';
 import Header from '../components/Header';
 import { Loader2 } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface BooksResponse {
   data: Book[];
@@ -17,13 +18,10 @@ const CatalogPage = () => {
   const [order, setOrder] = useState<SortOrder>('desc');
 
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === 'admin';
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery<BooksResponse>({
+  const { data, isLoading, isError, refetch } = useQuery<BooksResponse>({
     queryKey: ['books', sort, order],
     queryFn: () => getBooks({ sort, order }),
   });
@@ -34,7 +32,7 @@ const CatalogPage = () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
     },
     onError: () => {
-      alert('Failed to delete the book.');
+      console.error('Failed to delete the book');
     },
   });
 
@@ -52,11 +50,15 @@ const CatalogPage = () => {
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">Book Catalog</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Book Catalog
+          </h1>
 
           {/* Sorting Controls */}
           <div className="flex items-center space-x-3 bg-white p-2 rounded-lg shadow-sm border border-gray-200">
-            <span className="text-sm font-medium text-gray-500 pl-2">Sort by:</span>
+            <span className="text-sm font-medium text-gray-500 pl-2">
+              Sort by:
+            </span>
 
             <select
               value={sort}
@@ -98,7 +100,9 @@ const CatalogPage = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No books found
             </h3>
-            <p className="text-gray-500">The catalog is currently empty.</p>
+            <p className="text-gray-500">
+              The catalog is currently empty.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -106,7 +110,7 @@ const CatalogPage = () => {
               <BookCard
                 key={book.id}
                 book={book}
-                onDelete={handleDelete}
+                onDelete={isAdmin ? handleDelete : undefined}
               />
             ))}
           </div>

@@ -1,16 +1,23 @@
 // @ts-ignore
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBook } from '../api/books';
 import { CreateBookDTO } from '../types/book';
 import Header from '../components/Header';
 import BookForm from '../components/BookForm';
 import { ArrowLeft } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 const AdminCreateBookPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const user = useAuthStore((s) => s.user);
+
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   const mutation = useMutation({
     mutationFn: (newBook: CreateBookDTO) => createBook(newBook),

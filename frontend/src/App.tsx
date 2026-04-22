@@ -16,10 +16,10 @@ import AdminCreateBookPage from './pages/AdminCreateBookPage';
 import AdminEditBookPage from './pages/AdminEditBookPage';
 
 const ProtectedRoute = ({ children }: PropsWithChildren) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const user = useAuthStore((s) => s.user);
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -27,15 +27,14 @@ const ProtectedRoute = ({ children }: PropsWithChildren) => {
 };
 
 const AdminRoute = ({ children }: PropsWithChildren) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
-  const isAdmin = useAuthStore((state) => state.isAdmin());
+  const user = useAuthStore((s) => s.user);
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!isAdmin) {
+  if (user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
@@ -43,9 +42,7 @@ const AdminRoute = ({ children }: PropsWithChildren) => {
 };
 
 const AppRoutes = () => {
-  const isAuthenticated = useAuthStore((state) =>
-    state.isAuthenticated()
-  );
+  const user = useAuthStore((s) => s.user);
 
   return (
     <Routes>
@@ -89,12 +86,7 @@ const AppRoutes = () => {
 
       <Route
         path="*"
-        element={
-          <Navigate
-            to={isAuthenticated ? '/' : '/login'}
-            replace
-          />
-        }
+        element={<Navigate to={user ? '/' : '/login'} replace />}
       />
     </Routes>
   );
